@@ -1,10 +1,5 @@
 #!/usr/env python
 
-# https://github.com/dwyl/english-words
-# https://forums.macrumors.com/threads/dictionary-files-in-macos-high-sierra-10-13.2079925/
-# https://reverseengineering.stackexchange.com/questions/9426/how-to-read-nscr1000-data-files
-# https://www.collinsdictionary.com/sitemap.xml
-
 import re
 
 NO_OCCURENCE = -1
