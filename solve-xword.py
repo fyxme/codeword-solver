@@ -42,16 +42,16 @@ def get_regex_for_word(word, a):
                     ret[n] = '((?!{}).)'.format('|'.join(['\{}'.format(x) for x in xrange(1, n+1)]))
     return "^{}$".format("".join(ret))
 
-def get_words_matching_regex(dictionary, regex_string):
+def get_words_matching_regex(dictionary, regex_string, word_length):
     r = re.compile(regex_string, re.IGNORECASE)
-    return filter(r.match, dictionary)
+    return filter(r.match, dictionary[word_length])
 
 def get_words_matching_word_list(word_num_list, dictionary, alphabet):
-    return get_words_matching_regex(dictionary, get_regex_for_word(word_num_list, alphabet))
+    return get_words_matching_regex(dictionary, get_regex_for_word(word_num_list, alphabet), len(word_num_list))
 
 def get_entropy_level(word_num_list, dictionary, alphabet):
     e = len(get_words_matching_word_list(word_num_list, dictionary, alphabet))
-    if e == 0:
+    if not e:
         raise ValueError('No words possible for {}'.format(word_num_list))
     return e
 
@@ -88,8 +88,9 @@ def solver(dictionary, words, alphabet=dict()):
     else:
         # take the first word from the list and find all possible words
         c_word = s_words.pop(0)
-        count_f_words = len(get_words_matching_word_list(c_word, dictionary, alphabet))
-        for i, f_word in enumerate(get_words_matching_word_list(c_word, dictionary, alphabet)):
+        c_word_matches = get_words_matching_word_list(c_word, dictionary, alphabet)
+        count_f_words = len(c_word_matches)
+        for i, f_word in enumerate(c_word_matches):
             # add all the letters to the temp_alphabet
             temp_alphabet = get_alphabet_dict_from_word(c_word, f_word)
 
@@ -109,6 +110,16 @@ def solver(dictionary, words, alphabet=dict()):
                 return new_alpha
 
         return {} # second base case : no words match the alphabet/dictionary
+
+def word_list_to_word_length_dict(d):
+    ret = dict()
+    for word in d:
+        l_w = len(str(word))
+        if l_w in ret:
+            ret[l_w] += [str(word)]
+        else:
+            ret[l_w] = [str(word)]
+    return ret
 
 def main():
     words = [
@@ -167,10 +178,13 @@ def main():
         [17, 1, 4, 17]
     ]
 
-    dict_path = './english-words/combined.txt'
+    dict_path = './combined.txt'
 
     with open(dict_path) as f:
         d = f.read().split('\n')
+
+    # order the dictionary by word length to increase solving speed
+    d = word_list_to_word_length_dict(d)
 
     print "FINAL ALPHABET:\n{}".format(solver(d, words))
 
